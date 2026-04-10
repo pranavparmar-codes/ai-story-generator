@@ -568,47 +568,27 @@
 
             let storyText = data.story;
 
-            /* FIX: prevent [object Object] */
-
+            // If story is object → convert to readable text
             if (typeof storyText === "object") {
-
-                if (storyText.content) {
-                    storyText = storyText.content;
-                }
-
-                else if (storyText.text) {
-                    storyText = storyText.text;
-                }
-
-                else {
-                    storyText = JSON.stringify(storyText, null, 2);
-                }
-
+                storyText = JSON.stringify(storyText, null, 2);
             }
 
             const html = `
-<div class="story-section">
+    <div class="story-section">
+        <div class="story-header">
+            <div class="story-meta">
+                <span class="meta-tag">${data.genre || ""}</span>
+                <span class="meta-tag">${data.tone || ""}</span>
+            </div>
+            <button class="btn-copy" onclick="copyStory()">📋 Copy</button>
+        </div>
 
-<div class="story-header">
-
-<div class="story-meta">
-<span class="meta-tag">${data.genre || ""}</span>
-<span class="meta-tag">${data.tone || ""}</span>
-</div>
-
-<button class="btn-copy" onclick="copyStory()">📋 Copy</button>
-
-</div>
-
-<div class="story-content" id="storyText">${storyText}</div>
-
-</div>
-`;
+        <div class="story-content" id="storyText">${storyText}</div>
+    </div>
+    `;
 
             storyContainer.innerHTML = html;
-
         }
-
         function copyStory() {
 
             const text = document.getElementById('storyText').innerText;

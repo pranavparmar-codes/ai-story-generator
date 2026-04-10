@@ -6,22 +6,19 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# API key from environment variable
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 
-# Homepage route
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# Story generation API
 @app.route("/api/generate-story", methods=["POST"])
 def generate_story():
     try:
-
         data = request.json
+
         prompt = data.get("prompt", "")
         tone = data.get("tone", "adventure")
         genre = data.get("genre", "fantasy")
@@ -45,8 +42,8 @@ Tone: {tone}
 Genre: {genre}
 Length: approximately {min_words}-{max_words} words
 
-Write an engaging story with vivid descriptions, interesting characters,
-and a compelling plot.
+Write an engaging story with vivid descriptions,
+interesting characters, and a compelling plot.
 """
 
         headers = {
@@ -77,14 +74,16 @@ and a compelling plot.
         if response.status_code != 200:
             return jsonify({"error": result}), 500
 
-        # SAFE story extraction
-        story = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+        message = result.get("choices", [{}])[0].get("message", {})
+        content = message.get("content", "")
 
-        # Ensure string (fix [object Object])
-        if isinstance(story, dict):
-            story = story.get("content", str(story))
-
-        story = str(story)
+        # Fix for list/object responses
+        if isinstance(content, list):
+            story = "".join(
+                item.get("text", "") for item in content if isinstance(item, dict)
+            )
+        else:
+            story = str(content)
 
         return jsonify({
             "success": True,
@@ -97,7 +96,6 @@ and a compelling plot.
         return jsonify({"error": str(e)}), 500
 
 
-# Health check
 @app.route("/api/health")
 def health():
     return jsonify({"status": "ok"})

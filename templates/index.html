@@ -1,235 +1,624 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StoryWeave - AI Story Generator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryWeave - AI Story Generator</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital@0;1&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Crimson+Text&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+        :root {
+            --primary: #2a2d42;
+            --accent: #c9184a;
+            --accent-light: #ff006e;
+            --bg-dark: #0f1419;
+            --bg-light: #1a1f2e;
+            --text-light: #e8e9f3;
+            --text-muted: #a3a6c4;
+            --gold: #f4b942;
+            --success: #00d084;
+        }
 
-<style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-light) 100%);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
 
-body{
-font-family:'Outfit',sans-serif;
-background:#0f1419;
-color:white;
-padding:40px;
-}
+        /* Animated background elements */
+        .bg-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
 
-.container{
-max-width:900px;
-margin:auto;
-}
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.05;
+            filter: blur(50px);
+            animation: float 20s infinite;
+        }
 
-textarea,select{
-width:100%;
-padding:12px;
-margin-top:8px;
-background:#1a1f2e;
-border:1px solid #444;
-color:white;
-border-radius:6px;
-}
+        .orb1 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent);
+            top: -100px;
+            right: -100px;
+            animation-duration: 25s;
+        }
 
-button{
-margin-top:20px;
-padding:14px;
-width:100%;
-background:#ff006e;
-border:none;
-color:white;
-font-weight:bold;
-cursor:pointer;
-border-radius:6px;
-}
+        .orb2 {
+            width: 300px;
+            height: 300px;
+            background: var(--gold);
+            bottom: -50px;
+            left: -50px;
+            animation-duration: 30s;
+            animation-direction: reverse;
+        }
 
-.story-section{
-margin-top:40px;
-background:#1a1f2e;
-padding:20px;
-border-radius:8px;
-}
+        .orb3 {
+            width: 250px;
+            height: 250px;
+            background: var(--accent-light);
+            top: 50%;
+            left: 10%;
+            animation-duration: 28s;
+        }
 
-.story-content{
-line-height:1.7;
-white-space:pre-wrap;
-}
+        @keyframes float {
 
-.error{
-color:#ff6b6b;
-margin-top:20px;
-}
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
 
-.meta-tag{
-background:#333;
-padding:5px 10px;
-margin-right:10px;
-border-radius:5px;
-font-size:12px;
-}
+            50% {
+                transform: translate(30px, -30px);
+            }
+        }
 
-.loading-spinner{
-border:3px solid rgba(255,255,255,0.2);
-border-top:3px solid white;
-border-radius:50%;
-width:16px;
-height:16px;
-display:inline-block;
-animation:spin 1s linear infinite;
-}
+        /* Main container */
+        .container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 20px;
+        }
 
-@keyframes spin{
-to{transform:rotate(360deg)}
-}
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: slideDown 0.8s ease-out;
+        }
 
-</style>
+        .logo {
+            font-family: 'Crimson Text', serif;
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .tagline {
+            font-size: 16px;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        /* Main content */
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Form section */
+        .form-section {
+            background: rgba(42, 45, 66, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(201, 24, 74, 0.2);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            animation: slideUp 0.8s ease-out;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+
+        textarea,
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(15, 20, 25, 0.6);
+            border: 1px solid rgba(201, 24, 74, 0.3);
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            color: var(--text-light);
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        select {
+            min-height: auto;
+            cursor: pointer;
+            padding: 12px 16px;
+        }
+
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-light);
+            background: rgba(15, 20, 25, 0.8);
+            box-shadow: 0 0 20px rgba(201, 24, 74, 0.2);
+        }
+
+        .options-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .option-group label {
+            margin-bottom: 12px;
+        }
+
+        .option-group select {
+            padding: 12px;
+        }
+
+        /* Button */
+        .btn-generate {
+            width: 100%;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(201, 24, 74, 0.3);
+        }
+
+        .btn-generate:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(201, 24, 74, 0.5);
+        }
+
+        .btn-generate:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Story display */
+        .story-section {
+            background: rgba(42, 45, 66, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(244, 185, 66, 0.2);
+            border-radius: 16px;
+            padding: 40px;
+            min-height: 400px;
+            animation: slideUp 0.8s ease-out;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .story-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(244, 185, 66, 0.3);
+        }
+
+        .story-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(244, 185, 66, 0.1);
+            border: 1px solid rgba(244, 185, 66, 0.3);
+            border-radius: 6px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gold);
+        }
+
+        .btn-copy {
+            padding: 8px 16px;
+            background: rgba(201, 24, 74, 0.2);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-copy:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .story-content {
+            font-family: 'Crimson Text', serif;
+            font-size: 18px;
+            line-height: 1.8;
+            color: var(--text-light);
+            white-space: pre-wrap;
+            word-break: break-word;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Error message */
+        .error {
+            background: rgba(255, 0, 110, 0.1);
+            border: 1px solid rgba(255, 0, 110, 0.3);
+            color: #ff6eb4;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 36px;
+            }
+
+            .form-section,
+            .story-section {
+                padding: 28px;
+            }
+
+            .options-row {
+                grid-template-columns: 1fr;
+            }
+
+            .story-header {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .story-content {
+                font-size: 16px;
+            }
+        }
+    </style>
 </head>
 
 <body>
+    <div class="bg-orbs">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+        <div class="orb orb3"></div>
+    </div>
 
-<div class="container">
+    <div class="container">
+        <div class="header">
+            <div class="logo">StoryWeave</div>
+            <div class="tagline">Craft stories powered by AI</div>
+        </div>
 
-<h1>StoryWeave</h1>
+        <div class="content">
+            <div class="form-section">
+                <form id="storyForm">
+                    <div class="form-group">
+                        <label for="prompt">Story Prompt</label>
+                        <textarea id="prompt"
+                            placeholder="e.g., 'A mysterious traveler arrives in a forgotten village at midnight...'"
+                            required></textarea>
+                    </div>
 
-<form id="storyForm">
+                    <div class="options-row">
+                        <div class="option-group">
+                            <label for="genre">Genre</label>
+                            <select id="genre">
+                                <option value="fantasy">Fantasy</option>
+                                <option value="science-fiction">Science Fiction</option>
+                                <option value="mystery">Mystery</option>
+                                <option value="romance">Romance</option>
+                                <option value="horror">Horror</option>
+                                <option value="adventure">Adventure</option>
+                                <option value="historical">Historical Fiction</option>
+                            </select>
+                        </div>
 
-<label>Story Prompt</label>
-<textarea id="prompt" required></textarea>
+                        <div class="option-group">
+                            <label for="tone">Tone</label>
+                            <select id="tone">
+                                <option value="adventurous">Adventurous</option>
+                                <option value="dark">Dark & Mysterious</option>
+                                <option value="humorous">Humorous</option>
+                                <option value="poetic">Poetic</option>
+                                <option value="dramatic">Dramatic</option>
+                                <option value="whimsical">Whimsical</option>
+                            </select>
+                        </div>
 
-<label>Genre</label>
-<select id="genre">
-<option value="fantasy">Fantasy</option>
-<option value="science fiction">Sci-Fi</option>
-<option value="horror">Horror</option>
-<option value="romance">Romance</option>
-<option value="adventure">Adventure</option>
-</select>
+                        <div class="option-group">
+                            <label for="length">Length</label>
+                            <select id="length">
+                                <option value="short">Short (200-300 words)</option>
+                                <option value="medium" selected>Medium (500-800 words)</option>
+                                <option value="long">Long (1000-1500 words)</option>
+                            </select>
+                        </div>
+                    </div>
 
-<label>Tone</label>
-<select id="tone">
-<option value="dramatic">Dramatic</option>
-<option value="dark">Dark</option>
-<option value="humorous">Humorous</option>
-<option value="poetic">Poetic</option>
-</select>
+                    <button type="submit" class="btn-generate" id="submitBtn">
+                        <span id="btnText">Generate Story</span>
+                    </button>
+                </form>
+            </div>
 
-<label>Length</label>
-<select id="length">
-<option value="short">Short</option>
-<option value="medium" selected>Medium</option>
-<option value="long">Long</option>
-</select>
+            <div id="errorContainer"></div>
+            <div id="storyContainer"></div>
+        </div>
+    </div>
 
-<button type="submit" id="generateBtn">
-<span id="btnText">Generate Story</span>
-</button>
+    <script>
 
-</form>
+        const API_URL = '/api';
 
-<div id="error"></div>
-<div id="story"></div>
+        const form = document.getElementById('storyForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const errorContainer = document.getElementById('errorContainer');
+        const storyContainer = document.getElementById('storyContainer');
 
-</div>
+        form.addEventListener('submit', async (e) => {
 
-<script>
+            e.preventDefault();
 
-const API_URL="/api";
+            const prompt = document.getElementById('prompt').value.trim();
 
-const form=document.getElementById("storyForm");
-const storyBox=document.getElementById("story");
-const errorBox=document.getElementById("error");
-const btn=document.getElementById("generateBtn");
-const btnText=document.getElementById("btnText");
+            if (!prompt) {
+                showError('Please enter a story prompt.');
+                return;
+            }
 
-form.addEventListener("submit",async(e)=>{
+            const data = {
+                prompt: prompt,
+                genre: document.getElementById('genre').value,
+                tone: document.getElementById('tone').value,
+                length: document.getElementById('length').value
+            };
 
-e.preventDefault();
+            submitBtn.disabled = true;
+            btnText.innerHTML = '<span class="loading-spinner"></span>Generating...';
 
-errorBox.innerHTML="";
-storyBox.innerHTML="";
+            errorContainer.innerHTML = '';
+            storyContainer.innerHTML = '';
 
-const prompt=document.getElementById("prompt").value.trim();
+            try {
 
-if(!prompt){
-errorBox.innerHTML='<div class="error">Please enter a prompt</div>';
-return;
-}
+                const response = await fetch(`${API_URL}/generate-story`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
 
-const data={
-prompt:prompt,
-genre:document.getElementById("genre").value,
-tone:document.getElementById("tone").value,
-length:document.getElementById("length").value
-};
+                const result = await response.json();
 
-btn.disabled=true;
-btnText.innerHTML='<span class="loading-spinner"></span> Generating...';
+                if (!response.ok) {
+                    showError(result.error || 'Failed to generate story.');
+                    return;
+                }
 
-try{
+                displayStory(result);
 
-const res=await fetch(`${API_URL}/generate-story`,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify(data)
-});
+            } catch (error) {
 
-const result=await res.json();
+                showError(`Error: ${error.message}`);
 
-if(!res.ok){
-throw new Error(result.error || "Failed to generate story");
-}
+            } finally {
 
-let storyText=result.story;
+                submitBtn.disabled = false;
+                btnText.textContent = 'Generate Story';
 
-/* FIX: prevent object bug */
+            }
 
-if(typeof storyText==="object"){
+        });
 
-if(storyText.content){
-storyText=storyText.content;
-}
+        function showError(message) {
+            errorContainer.innerHTML = `<div class="error">${message}</div>`;
+        }
 
-else if(storyText.text){
-storyText=storyText.text;
-}
+        function displayStory(data) {
 
-else{
-storyText=JSON.stringify(storyText,null,2);
-}
+            let storyText = data.story;
 
-}
+            /* FIX: prevent [object Object] */
 
-storyBox.innerHTML=`
+            if (typeof storyText === "object") {
 
+                if (storyText.content) {
+                    storyText = storyText.content;
+                }
+
+                else if (storyText.text) {
+                    storyText = storyText.text;
+                }
+
+                else {
+                    storyText = JSON.stringify(storyText, null, 2);
+                }
+
+            }
+
+            const html = `
 <div class="story-section">
 
-<div>
-<span class="meta-tag">${result.genre || ""}</span>
-<span class="meta-tag">${result.tone || ""}</span>
+<div class="story-header">
+
+<div class="story-meta">
+<span class="meta-tag">${data.genre || ""}</span>
+<span class="meta-tag">${data.tone || ""}</span>
 </div>
 
-<div class="story-content" id="storyText">
-${storyText}
-</div>
+<button class="btn-copy" onclick="copyStory()">📋 Copy</button>
 
 </div>
 
+<div class="story-content" id="storyText">${storyText}</div>
+
+</div>
 `;
 
-}catch(err){
+            storyContainer.innerHTML = html;
 
-errorBox.innerHTML=`<div class="error">${err.message}</div>`;
+        }
 
-}
+        function copyStory() {
 
-btn.disabled=false;
-btnText.textContent="Generate Story";
+            const text = document.getElementById('storyText').innerText;
 
-});
+            navigator.clipboard.writeText(text).then(() => {
 
-</script>
+                alert('Story copied to clipboard!');
 
+            }).catch(() => {
+
+                alert('Failed to copy story.');
+
+            });
+
+        }
+
+    </script>
 </body>
+
 </html>

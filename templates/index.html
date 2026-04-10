@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StoryWeave - AI Story Generator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital@0;1&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital@0;1&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -24,7 +27,8 @@
             --success: #00d084;
         }
 
-        html, body {
+        html,
+        body {
             width: 100%;
             height: 100%;
             font-family: 'Outfit', sans-serif;
@@ -81,8 +85,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(30px, -30px); }
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(30px, -30px);
+            }
         }
 
         /* Main container */
@@ -159,7 +170,8 @@
             margin-bottom: 12px;
         }
 
-        textarea, select {
+        textarea,
+        select {
             width: 100%;
             padding: 14px 16px;
             background: rgba(15, 20, 25, 0.6);
@@ -179,7 +191,8 @@
             padding: 12px 16px;
         }
 
-        textarea:focus, select:focus {
+        textarea:focus,
+        select:focus {
             outline: none;
             border-color: var(--accent-light);
             background: rgba(15, 20, 25, 0.8);
@@ -252,7 +265,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Story display */
@@ -346,6 +361,7 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -357,6 +373,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -364,8 +381,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         /* Responsive */
@@ -374,7 +396,8 @@
                 font-size: 36px;
             }
 
-            .form-section, .story-section {
+            .form-section,
+            .story-section {
                 padding: 28px;
             }
 
@@ -393,6 +416,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="bg-orbs">
         <div class="orb orb1"></div>
@@ -411,7 +435,9 @@
                 <form id="storyForm">
                     <div class="form-group">
                         <label for="prompt">Story Prompt</label>
-                        <textarea id="prompt" placeholder="e.g., 'A mysterious traveler arrives in a forgotten village at midnight...'" required></textarea>
+                        <textarea id="prompt"
+                            placeholder="e.g., 'A mysterious traveler arrives in a forgotten village at midnight...'"
+                            required></textarea>
                     </div>
 
                     <div class="options-row">
@@ -462,7 +488,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:5000/api';
+        const API_URL = '/api';
 
         const form = document.getElementById('storyForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -487,7 +513,7 @@
             };
 
             submitBtn.disabled = true;
-            btnText.innerHTML = '<span class="loading-spinner"></span>Generating...';
+            btnText.innerHTML = 'Generating...';
             errorContainer.innerHTML = '';
             storyContainer.innerHTML = '';
 
@@ -508,8 +534,9 @@
                 }
 
                 displayStory(result);
+
             } catch (error) {
-                showError(`Error: ${error.message}. Make sure the backend is running on http://localhost:5000`);
+                showError(`Error: ${error.message}`);
             } finally {
                 submitBtn.disabled = false;
                 btnText.textContent = 'Generate Story';
@@ -522,28 +549,27 @@
 
         function displayStory(data) {
             const html = `
-                <div class="story-section">
-                    <div class="story-header">
-                        <div class="story-meta">
-                            <span class="meta-tag">${data.genre}</span>
-                            <span class="meta-tag">${data.tone}</span>
-                        </div>
-                        <button class="btn-copy" onclick="copyStory()">📋 Copy</button>
-                    </div>
-                    <div class="story-content" id="storyText">${data.story}</div>
+        <div class="story-section">
+            <div class="story-header">
+                <div class="story-meta">
+                    <span class="meta-tag">${data.genre}</span>
+                    <span class="meta-tag">${data.tone}</span>
                 </div>
-            `;
+                <button class="btn-copy" onclick="copyStory()">📋 Copy</button>
+            </div>
+            <div class="story-content" id="storyText">${data.story}</div>
+        </div>
+    `;
             storyContainer.innerHTML = html;
         }
 
         function copyStory() {
             const text = document.getElementById('storyText').innerText;
             navigator.clipboard.writeText(text).then(() => {
-                alert('Story copied to clipboard!');
-            }).catch(() => {
-                alert('Failed to copy story.');
+                alert('Story copied!');
             });
         }
     </script>
 </body>
+
 </html>

@@ -1,105 +1,77 @@
-from flask import Flask, request, jsonify, render_template
+import os
+from flask import Flask, jsonify
 from flask_cors import CORS
 import requests
-import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-
-
-@app.route("/")
+@app.route('/')
 def home():
-    return render_template("index.html")
+    with open('index.html', 'r') as f:
+        return f.read()
 
-
-@app.route("/api/generate-story", methods=["POST"])
+@app.route('/api/generate-story', methods=['POST'])
 def generate_story():
     try:
-        data = request.json
-
-        prompt = data.get("prompt", "")
-        tone = data.get("tone", "adventure")
-        genre = data.get("genre", "fantasy")
-        length = data.get("length", "medium")
-
+        from flask import request
+        data = request.get_json()
+        prompt = data.get('prompt', '')
+        
         if not prompt:
-            return jsonify({"error": "Prompt is required"}), 400
-
-        length_params = {
-            "short": (200, 300),
-            "medium": (500, 800),
-            "long": (1000, 1500)
-        }
-
-        min_words, max_words = length_params.get(length, (500, 800))
-
-        system_prompt = f"""
-You are a creative storyteller.
-
-Tone: {tone}
-Genre: {genre}
-Length: approximately {min_words}-{max_words} words
-
-Write an engaging story with vivid descriptions,
-interesting characters, and a compelling plot.
-"""
-
+            return jsonify({'error': 'Prompt is required'}), 400
+        
+        api_key = os.getenv('OPENROUTER_API_KEY')
+        
+        if not api_key:
+            return jsonify({'error': 'API key not configured'}), 500
+        
         headers = {
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "HTTP-Referer": "https://ai-story-generator",
-            "X-Title": "AI Story Generator"
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://localhost:5000'
         }
-
+        
         payload = {
-            "model": "meta-llama/llama-3-8b-instruct",
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Write a story about: {prompt}"}
+            'model': 'meta-llama/llama-3-8b-instruct',
+            'messages': [
+                {
+                    'role': 'user',
+                    'content': prompt
+                }
             ],
-            "temperature": 0.7,
-            "max_tokens": 2000
+            'max_tokens': 1500
         }
-
+        
         response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
+            'https://openrouter.ai/api/v1/chat/completions',
             headers=headers,
             json=payload,
-            timeout=60
+            timeout=120
         )
-
-        result = response.json()
-
+        
         if response.status_code != 200:
-            return jsonify({"error": result}), 500
-
-        message = result.get("choices", [{}])[0].get("message", {})
-        content = message.get("content", "")
-
-        # Fix for list/object responses
-        if isinstance(content, list):
-            story = "".join(
-                item.get("text", "") for item in content if isinstance(item, dict)
-            )
-        else:
-            story = str(content)
-
-        return jsonify({
-            "success": True,
-            "story": story,
-            "genre": genre,
-            "tone": tone
-        })
-
+            return jsonify({'error': f'API Error: {response.status_code}'}), 500
+        
+        result = response.json()
+        
+        if 'choices' in result and len(result['choices']) > 0:
+            story = result['choices'][0]['message']['content']
+            return jsonify({
+                'success': True,
+                'story': story,
+                'prompt': prompt,
+                'genre': data.get('genre', 'fantasy'),
+                'tone': data.get('tone', 'adventurous')
+            }), 200
+        
+        return jsonify({'error': 'No story generated'}), 500
+    
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({'error': str(e)}), 500
 
-
-@app.route("/api/health")
-def health():
-    return jsonify({"status": "ok"})
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=5000, debug=True)

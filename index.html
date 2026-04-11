@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StoryWeave - AI Story Generator</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital@0;1&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital@0;1&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -27,8 +24,7 @@
             --success: #00d084;
         }
 
-        html,
-        body {
+        html, body {
             width: 100%;
             height: 100%;
             font-family: 'Outfit', sans-serif;
@@ -37,7 +33,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated background elements */
         .bg-orbs {
             position: fixed;
             top: 0;
@@ -85,18 +80,10 @@
         }
 
         @keyframes float {
-
-            0%,
-            100% {
-                transform: translate(0, 0);
-            }
-
-            50% {
-                transform: translate(30px, -30px);
-            }
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -30px); }
         }
 
-        /* Main container */
         .container {
             position: relative;
             z-index: 1;
@@ -106,7 +93,6 @@
             padding: 40px 20px;
         }
 
-        /* Header */
         .header {
             text-align: center;
             margin-bottom: 60px;
@@ -133,14 +119,12 @@
             font-weight: 300;
         }
 
-        /* Main content */
         .content {
             max-width: 900px;
             margin: 0 auto;
             width: 100%;
         }
 
-        /* Form section */
         .form-section {
             background: rgba(42, 45, 66, 0.4);
             backdrop-filter: blur(10px);
@@ -170,8 +154,7 @@
             margin-bottom: 12px;
         }
 
-        textarea,
-        select {
+        textarea, select {
             width: 100%;
             padding: 14px 16px;
             background: rgba(15, 20, 25, 0.6);
@@ -191,8 +174,7 @@
             padding: 12px 16px;
         }
 
-        textarea:focus,
-        select:focus {
+        textarea:focus, select:focus {
             outline: none;
             border-color: var(--accent-light);
             background: rgba(15, 20, 25, 0.8);
@@ -219,7 +201,6 @@
             padding: 12px;
         }
 
-        /* Button */
         .btn-generate {
             width: 100%;
             padding: 16px 32px;
@@ -265,12 +246,9 @@
         }
 
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
         }
 
-        /* Story display */
         .story-section {
             background: rgba(42, 45, 66, 0.4);
             backdrop-filter: blur(10px);
@@ -344,7 +322,6 @@
             font-style: italic;
         }
 
-        /* Error message */
         .error {
             background: rgba(255, 0, 110, 0.1);
             border: 1px solid rgba(255, 0, 110, 0.3);
@@ -355,13 +332,11 @@
             animation: slideDown 0.4s ease-out;
         }
 
-        /* Animations */
         @keyframes slideDown {
             from {
                 opacity: 0;
                 transform: translateY(-20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -373,7 +348,6 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -381,23 +355,16 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .logo {
                 font-size: 36px;
             }
 
-            .form-section,
-            .story-section {
+            .form-section, .story-section {
                 padding: 28px;
             }
 
@@ -416,7 +383,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="bg-orbs">
         <div class="orb orb1"></div>
@@ -435,9 +401,7 @@
                 <form id="storyForm">
                     <div class="form-group">
                         <label for="prompt">Story Prompt</label>
-                        <textarea id="prompt"
-                            placeholder="e.g., 'A mysterious traveler arrives in a forgotten village at midnight...'"
-                            required></textarea>
+                        <textarea id="prompt" placeholder="e.g., 'A mysterious traveler arrives in a forgotten village at midnight...'" required></textarea>
                     </div>
 
                     <div class="options-row">
@@ -488,9 +452,6 @@
     </div>
 
     <script>
-
-        const API_URL = '/api';
-
         const form = document.getElementById('storyForm');
         const submitBtn = document.getElementById('submitBtn');
         const btnText = document.getElementById('btnText');
@@ -498,11 +459,9 @@
         const storyContainer = document.getElementById('storyContainer');
 
         form.addEventListener('submit', async (e) => {
-
             e.preventDefault();
 
             const prompt = document.getElementById('prompt').value.trim();
-
             if (!prompt) {
                 showError('Please enter a story prompt.');
                 return;
@@ -517,13 +476,11 @@
 
             submitBtn.disabled = true;
             btnText.innerHTML = '<span class="loading-spinner"></span>Generating...';
-
             errorContainer.innerHTML = '';
             storyContainer.innerHTML = '';
 
             try {
-
-                const response = await fetch('/api/generate-story', {
+                const response = await fetch(`/api/generate-story`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -531,33 +488,26 @@
                     body: JSON.stringify(data)
                 });
 
-                // Read as text first (prevents JSON crash)
-                const text = await response.text();
-
-                let result;
-                try {
-                    result = JSON.parse(text);
-                } catch (e) {
-                    showError(`Server returned non-JSON response: ${text}`);
-                    return;
-                }
+                const result = await response.json();
+                console.log('API Response:', result);
 
                 if (!response.ok) {
                     showError(result.error || 'Failed to generate story.');
                     return;
                 }
 
-                displayStory(result);
-
+                if (result.success && result.story) {
+                    displayStory(result);
+                } else {
+                    showError('No story generated. Please try again.');
+                }
             } catch (error) {
+                console.error('Error:', error);
                 showError(`Error: ${error.message}`);
             } finally {
-
                 submitBtn.disabled = false;
                 btnText.textContent = 'Generate Story';
-
             }
-
         });
 
         function showError(message) {
@@ -565,47 +515,36 @@
         }
 
         function displayStory(data) {
-
-            let storyText = data.story;
-
-            // If story is object → convert to readable text
-            if (typeof storyText === "object") {
-                storyText = JSON.stringify(storyText, null, 2);
+            console.log('Displaying story:', data);
+            
+            if (!data.story) {
+                showError('No story content received');
+                return;
             }
 
             const html = `
-    <div class="story-section">
-        <div class="story-header">
-            <div class="story-meta">
-                <span class="meta-tag">${data.genre || ""}</span>
-                <span class="meta-tag">${data.tone || ""}</span>
-            </div>
-            <button class="btn-copy" onclick="copyStory()">📋 Copy</button>
-        </div>
-
-        <div class="story-content" id="storyText">${storyText}</div>
-    </div>
-    `;
-
+                <div class="story-section">
+                    <div class="story-header">
+                        <div class="story-meta">
+                            <span class="meta-tag">${data.genre || 'unknown'}</span>
+                            <span class="meta-tag">${data.tone || 'unknown'}</span>
+                        </div>
+                        <button class="btn-copy" onclick="copyStory()">📋 Copy</button>
+                    </div>
+                    <div class="story-content" id="storyText">${data.story}</div>
+                </div>
+            `;
             storyContainer.innerHTML = html;
         }
+
         function copyStory() {
-
             const text = document.getElementById('storyText').innerText;
-
             navigator.clipboard.writeText(text).then(() => {
-
                 alert('Story copied to clipboard!');
-
             }).catch(() => {
-
                 alert('Failed to copy story.');
-
             });
-
         }
-
     </script>
 </body>
-
 </html>
